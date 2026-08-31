@@ -1,4 +1,4 @@
-package application.domain.value;
+package application.domain.valueobjects;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -7,8 +7,18 @@ import java.util.Objects;
 
 /**
  * Value Object que representa una cantidad de dinero con su moneda.
+ *
+ * <p>Reglas de negocio:</p>
+ * <ul>
+ *   <li>Inmutable.</li>
+ *   <li>El monto no puede ser negativo.</li>
+ *   <li>La moneda es obligatoria.</li>
+ *   <li>La precisión es de 2 decimales con redondeo {@code HALF_UP}.</li>
+ *   <li>Solo se pueden operar montos de la misma moneda.</li>
+ *   <li>La igualdad es por valor (monto y moneda).</li>
+ * </ul>
  */
-public class Money {
+public final class Money {
 
     private final BigDecimal amount;
     private final Currency currency;
@@ -27,6 +37,9 @@ public class Money {
         this.currency = currency;
     }
 
+    /**
+     * Fábrica a partir de valores planos, p. ej. {@code Money.of("19.99", "USD")}.
+     */
     public static Money of(String amount, String currencyCode) {
         return new Money(new BigDecimal(amount), Currency.getInstance(currencyCode));
     }
@@ -49,6 +62,10 @@ public class Money {
         return new Money(this.amount.multiply(BigDecimal.valueOf(multiplier)), this.currency);
     }
 
+    public Money multiply(BigDecimal multiplier) {
+        return new Money(this.amount.multiply(multiplier), this.currency);
+    }
+
     public boolean isGreaterThan(Money other) {
         validateSameCurrency(other);
         return this.amount.compareTo(other.amount) > 0;
@@ -65,8 +82,8 @@ public class Money {
 
     private void validateSameCurrency(Money other) {
         if (!this.currency.equals(other.currency)) {
-            throw new IllegalArgumentException("No se pueden operar monedas diferentes: " 
-                + this.currency + " vs " + other.currency);
+            throw new IllegalArgumentException(
+                "No se pueden operar monedas diferentes: " + this.currency + " vs " + other.currency);
         }
     }
 
@@ -80,8 +97,12 @@ public class Money {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         Money money = (Money) o;
         return amount.compareTo(money.amount) == 0 && currency.equals(money.currency);
     }
@@ -93,21 +114,6 @@ public class Money {
 
     @Override
     public String toString() {
-        return currency.getSymbol() + " " + amount.toPlainString();
+        return amount.toPlainString() + " " + currency.getCurrencyCode();
     }
 }
-</｜DSML｜>
-<task_progress>
-- [x] Leer el SDD (archivos vacíos - 0 bytes)
-- [x] Analizar la estructura del proyecto existente (nexusm)
-- [ ] Crear Value Objects del dominio
-- [ ] Crear Entidades del dominio
-- [ ] Crear Repositorios del dominio
-- [ ] Crear Servicios de aplicación
-- [ ] Crear DTOs de aplicación
-- [ ] Crear Controladores REST
-- [ ] Crear Configuración de seguridad
-- [ ] Crear Configuración de la aplicación
-- [ ] Verificar la implementación
-</task_progress>
-</write_to_file>
